@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prode Mundial 2026</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75;
+    --green-dark: #0F6E56;
+    --green-light: #E1F5EE;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --red-light: #FAECE7;
+    --red: #993C1D;
+    --bg: #f5f5f3;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --border-md: rgba(0,0,0,0.18);
+    --text: #1a1a1a;
+    --text-muted: #666;
+    --text-hint: #999;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --surface: #252525;
+      --border: rgba(255,255,255,0.1);
+      --border-md: rgba(255,255,255,0.18);
+      --text: #f0f0f0;
+      --text-muted: #aaa;
+      --text-hint: #666;
+      --green-light: #0a2e22;
+      --amber-light: #2a1f05;
+      --red-light: #2a0f08;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .container { max-width: 680px; margin: 0 auto; padding: 1rem; }
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--border); }
+  .logo { width: 42px; height: 42px; border-radius: var(--radius); background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .header h1 { font-size: 17px; font-weight: 600; }
+  .header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--radius); border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s; }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--green); color: #fff; border-color: var(--green); width: 100%; justify-content: center; font-size: 14px; padding: 11px; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .tabs { display: flex; gap: 4px; background: var(--border); padding: 3px; border-radius: var(--radius); margin-bottom: 1.5rem; }
+  .tab { flex: 1; padding: 8px; font-size: 13px; border: none; background: transparent; cursor: pointer; border-radius: 6px; color: var(--text-muted); font-weight: 400; transition: all .15s; }
+  .tab.active { background: var(--surface); color: var(--text); font-weight: 500; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .group-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin: 1.25rem 0 8px; }
+  .group-title:first-child { margin-top: 0; }
+  .match { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .match:last-child { margin-bottom: 0; }
+  .team { font-size: 13px; font-weight: 500; }
+  .team.right { text-align: right; }
+  .score-wrap { display: flex; align-items: center; gap: 5px; }
+  .score-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .score-label { font-size: 10px; color: var(--text-hint); }
+  .score-input { width: 38px; height: 34px; text-align: center; font-size: 14px; font-weight: 600; border: 0.5px solid var(--border-md); border-radius: var(--radius); background: var(--bg); color: var(--text); }
+  .score-input:focus { outline: none; border-color: var(--green); }
+  .score-sep { color: var(--text-hint); font-size: 13px; align-self: flex-start; margin-top: 18px; }
+  .pts-badge { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+  .pts-3 { background: var(--green-light); color: var(--green-dark); }
+  .pts-2 { background: var(--amber-light); color: var(--amber); }
+  .pts-1 { background: var(--amber-light); color: var(--amber); }
+  .pts-0 { background: var(--border); color: var(--text-muted); }
+  .msg { font-size: 13px; color: var(--text-muted); padding: .75rem 1rem; background: var(--bg); border-radius: var(--radius); text-align: center; margin-bottom: 1rem; }
+  .msg.success { color: var(--green-dark); background: var(--green-light); }
+  .msg.error { color: var(--red); background: var(--red-light); }
+  .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+  .login-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 340px; }
+  .login-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .login-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5; }
+  .field-label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px; }
+  .field-input { width: 100%; padding: 9px 12px; border: 0.5px solid var(--border-md); border-radius: var(--radius); background: var(--bg); color: var(--text); font-size: 14px; margin-bottom: 10px; }
+  .field-input:focus { outline: none; border-color: var(--green); }
+  .rank-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+  .rank-row:last-child { border-bottom: none; }
+  .pos { font-size: 13px; font-weight: 600; color: var(--text-muted); width: 22px; text-align: center; }
+  .pos.gold { color: var(--amber); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .player-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .pts-num { font-size: 16px; font-weight: 600; }
+  .pts-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; text-align: right; }
+  .info-box { font-size: 12px; color: var(--text-muted); background: var(--bg); border-radius: var(--radius); padding: .75rem 1rem; line-height: 1.7; margin-top: 1rem; }
+  .separator { height: 0.5px; background: var(--border); margin: 1rem 0; }
+  .actions-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .player-switcher { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .player-chip { font-size: 12px; padding: 4px 10px; border-radius: 20px; border: 0.5px solid var(--border-md); background: var(--surface); color: var(--text-muted); cursor: pointer; }
+  .player-chip.active { background: var(--green); color: #fff; border-color: var(--green); }
+  textarea { width: 100%; min-height: 80px; padding: 8px; border: 0.5px solid var(--border-md); border-radius: var(--radius); background: var(--bg); color: var(--text); font-size: 12px; font-family: monospace; resize: vertical; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="logo">🏆</div>
+    <div>
+      <h1>Prode Mundial 2026</h1>
+      <p id="user-label">Cargando...</p>
+    </div>
+    <button class="btn btn-sm" id="logout-btn" style="display:none;margin-left:auto" onclick="logout()">Salir</button>
+  </div>
+
+  <div id="login-section" class="login-wrap">
+    <div class="login-card">
+      <h2>¡Bienvenido al prode!</h2>
+      <p>Ingresá tu nombre para cargar tus pronósticos y competir con tus amigos.</p>
+      <label class="field-label">Tu nombre</label>
+      <input class="field-input" type="text" id="login-name" placeholder="Ej: Rodrigo" maxlength="20" />
+      <button class="btn btn-primary" onclick="doLogin()">Entrar al prode</button>
+      <div id="login-msg"></div>
+    </div>
+  </div>
+
+  <div id="main-section" style="display:none">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('pronosticos',this)">📝 Mis pronósticos</button>
+      <button class="tab" onclick="showTab('resultados',this)">⚽ Resultados</button>
+      <button class="tab" onclick="showTab('ranking',this)">📊 Ranking</button>
+      <button class="tab" onclick="showTab('datos',this)">🔗 Compartir</button>
+    </div>
+    <div class="section active" id="tab-pronosticos"></div>
+    <div class="section" id="tab-resultados"></div>
+    <div class="section" id="tab-ranking"></div>
+    <div class="section" id="tab-datos"></div>
+  </div>
+
+</div>
+<script>
+const MATCHES = [
+  {id:'A1',group:'A',home:'México',away:'Canadá'},
+  {id:'A2',group:'A',home:'Estados Unidos',away:'Honduras'},
+  {id:'A3',group:'A',home:'México',away:'Estados Unidos'},
+  {id:'A4',group:'A',home:'Canadá',away:'Honduras'},
+  {id:'A5',group:'A',home:'México',away:'Honduras'},
+  {id:'A6',group:'A',home:'Canadá',away:'Estados Unidos'},
+  {id:'B1',group:'B',home:'Argentina',away:'Chile'},
+  {id:'B2',group:'B',home:'Ecuador',away:'Perú'},
+  {id:'B3',group:'B',home:'Argentina',away:'Ecuador'},
+  {id:'B4',group:'B',home:'Chile',away:'Perú'},
+  {id:'B5',group:'B',home:'Argentina',away:'Perú'},
+  {id:'B6',group:'B',home:'Chile',away:'Ecuador'},
+  {id:'C1',group:'C',home:'Brasil',away:'Colombia'},
+  {id:'C2',group:'C',home:'Venezuela',away:'Bolivia'},
+  {id:'C3',group:'C',home:'Brasil',away:'Venezuela'},
+  {id:'C4',group:'C',home:'Colombia',away:'Bolivia'},
+  {id:'C5',group:'C',home:'Brasil',away:'Bolivia'},
+  {id:'C6',group:'C',home:'Colombia',away:'Venezuela'},
+  {id:'D1',group:'D',home:'España',away:'Portugal'},
+  {id:'D2',group:'D',home:'Marruecos',away:'Bélgica'},
+  {id:'D3',group:'D',home:'España',away:'Marruecos'},
+  {id:'D4',group:'D',home:'Portugal',away:'Bélgica'},
+  {id:'D5',group:'D',home:'España',away:'Bélgica'},
+  {id:'D6',group:'D',home:'Portugal',away:'Marruecos'},
+  {id:'E1',group:'E',home:'Francia',away:'Alemania'},
+  {id:'E2',group:'E',home:'Países Bajos',away:'Dinamarca'},
+  {id:'E3',group:'E',home:'Francia',away:'Países Bajos'},
+  {id:'E4',group:'E',home:'Alemania',away:'Dinamarca'},
+  {id:'E5',group:'E',home:'Francia',away:'Dinamarca'},
+  {id:'E6',group:'E',home:'Alemania',away:'Países Bajos'},
+  {id:'F1',group:'F',home:'Inglaterra',away:'Turquía'},
+  {id:'F2',group:'F',home:'Senegal',away:'Austria'},
+  {id:'F3',group:'F',home:'Inglaterra',away:'Senegal'},
+  {id:'F4',group:'F',home:'Turquía',away:'Austria'},
+  {id:'F5',group:'F',home:'Inglaterra',away:'Austria'},
+  {id:'F6',group:'F',home:'Turquía',away:'Senegal'},
+  {id:'G1',group:'G',home:'Italia',away:'Croacia'},
+  {id:'G2',group:'G',home:'Polonia',away:'Eslovaquia'},
+  {id:'G3',group:'G',home:'Italia',away:'Polonia'},
+  {id:'G4',group:'G',home:'Croacia',away:'Eslovaquia'},
+  {id:'G5',group:'G',home:'Italia',away:'Eslovaquia'},
+  {id:'G6',group:'G',home:'Croacia',away:'Polonia'},
+  {id:'H1',group:'H',home:'Japón',away:'Corea del Sur'},
+  {id:'H2',group:'H',home:'Arabia Saudita',away:'Australia'},
+  {id:'H3',group:'H',home:'Japón',away:'Arabia Saudita'},
+  {id:'H4',group:'H',home:'Corea del Sur',away:'Australia'},
+  {id:'H5',group:'H',home:'Japón',away:'Australia'},
+  {id:'H6',group:'H',home:'Corea del Sur',away:'Arabia Saudita'},
+];
+
+const AVATAR_COLORS = [
+  {bg:'#dbeafe',c:'#1e40af'},{bg:'#dcfce7',c:'#166534'},
+  {bg:'#fef9c3',c:'#854d0e'},{bg:'#fce7f3',c:'#9d174d'},
+  {bg:'#ede9fe',c:'#4c1d95'},{bg:'#ffedd5',c:'#9a3412'},
+];
+
+let currentUser = null;
+let allPredictions = {};
+let realResults = {};
+
+function loadAll() {
+  try { allPredictions = JSON.parse(localStorage.getItem('prode_preds') || '{}'); } catch(e){ allPredictions={}; }
+  try { realResults = JSON.parse(localStorage.getItem('prode_results') || '{}'); } catch(e){ realResults={}; }
+}
+function saveAll() {
+  localStorage.setItem('prode_preds', JSON.stringify(allPredictions));
+}
+function saveResults() {
+  localStorage.setItem('prode_results', JSON.stringify(realResults));
+}
+
+function calcPoints(pred, real) {
+  if (!pred || pred.h==='' || pred.a==='' || !real || real.h==='' || real.a==='') return null;
+  const ph=+pred.h, pa=+pred.a, rh=+real.h, ra=+real.a;
+  let pts = 0;
+  const predSign = ph>pa?1:ph<pa?-1:0;
+  const realSign = rh>ra?1:rh<ra?-1:0;
+  if (ph===rh && pa===ra) pts = 3;
+  else if (predSign===realSign) pts = 1;
+  // bonus gol local
+  if (pred.gh !== undefined && pred.gh !== '' && real.gh !== undefined && real.gh !== '') {
+    if (+pred.gh === rh) pts += 1;
+  }
+  return pts;
+}
+
+function getAvatar(name) {
+  let h=0; for(let i=0;i<name.length;i++) h=(h+name.charCodeAt(i))%AVATAR_COLORS.length;
+  return AVATAR_COLORS[h];
+}
+function initials(name){ return name.slice(0,2).toUpperCase(); }
+
+function doLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  if (!name || name.length < 2) {
+    document.getElementById('login-msg').innerHTML='<div class="msg error" style="margin-top:10px">Ingresá al menos 2 caracteres.</div>';
+    return;
+  }
+  currentUser = name;
+  loadAll();
+  document.getElementById('login-section').style.display='none';
+  document.getElementById('main-section').style.display='';
+  document.getElementById('user-label').textContent='Jugando como ' + name;
+  document.getElementById('logout-btn').style.display='';
+  renderPronosticos();
+}
+
+function logout() {
+  currentUser=null;
+  document.getElementById('login-section').style.display='';
+  document.getElementById('main-section').style.display='none';
+  document.getElementById('user-label').textContent='';
+  document.getElementById('logout-btn').style.display='none';
+  document.getElementById('login-name').value='';
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.querySelectorAll('.section').forEach((s,i)=>s.classList.toggle('active',i===0));
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='pronosticos') renderPronosticos();
+  if(name==='resultados') renderResultados();
+  if(name==='ranking') renderRanking();
+  if(name==='datos') renderDatos();
+}
+
+function renderPronosticos() {
+  const myPreds = allPredictions[currentUser] || {};
+  const groups = [...new Set(MATCHES.map(m=>m.group))];
+  let html = '<div class="msg" style="margin-bottom:1rem">🎯 <strong>Sistema de puntos:</strong> Resultado exacto = 3 pts · Solo ganador/empate = 1 pt · + 1 pt bonus por acertar goles del local</div>';
+  for (const g of groups) {
+    html += `<div class="group-title">Grupo ${g}</div>`;
+    for (const m of MATCHES.filter(x=>x.group===g)) {
+      const pred = myPreds[m.id] || {};
+      const real = realResults[m.id] || {};
+      let pts = null;
+      if (real.h!==undefined && real.h!=='') pts = calcPoints(pred, real);
+      const ptsHtml = pts!==null ? `<span class="pts-badge pts-${Math.min(pts,3)}">${pts} pt${pts!==1?'s':''}</span>` : '';
+      html += `<div class="card" style="padding:.8rem 1.25rem">
+        <div class="match" style="margin-bottom:${pts!==null?'6px':'0'}">
+          <div class="team">${m.home}</div>
+          <div class="score-wrap">
+            <div class="score-col">
+              <span class="score-label">Goles local</span>
+              <input class="score-input" type="number" min="0" max="20" id="p_gh_${m.id}" value="${pred.gh??''}" placeholder="-" style="border-color:var(--green);width:44px">
+            </div>
+            <div class="score-col" style="margin-top:16px">
+              <input class="score-input" type="number" min="0" max="20" id="p_h_${m.id}" value="${pred.h??''}" placeholder="-">
+              <span class="score-label">Local</span>
+            </div>
+            <span class="score-sep">:</span>
+            <div class="score-col" style="margin-top:16px">
+              <input class="score-input" type="number" min="0" max="20" id="p_a_${m.id}" value="${pred.a??''}" placeholder="-">
+              <span class="score-label">Visita</span>
+            </div>
+          </div>
+          <div class="team right">${m.away}</div>
+        </div>
+        ${ptsHtml ? `<div style="display:flex;justify-content:center">${ptsHtml}</div>` : ''}
+      </div>`;
+    }
+  }
+  html += `<button class="btn btn-primary" id="save-pred-btn" style="margin-top:.5rem" onclick="guardarPronosticos()">💾 Guardar mis pronósticos</button>`;
+  html += `<div id="pred-msg"></div>`;
+  document.getElementById('tab-pronosticos').innerHTML = html;
+}
+
+function guardarPronosticos() {
+  const btn = document.getElementById('save-pred-btn');
+  btn.textContent = 'Guardando...'; btn.disabled=true;
+  const preds = {};
+  for (const m of MATCHES) {
+    preds[m.id] = {
+      h: document.getElementById('p_h_'+m.id)?.value ?? '',
+      a: document.getElementById('p_a_'+m.id)?.value ?? '',
+      gh: document.getElementById('p_gh_'+m.id)?.value ?? '',
+    };
+  }
+  allPredictions[currentUser] = preds;
+  saveAll();
+  btn.textContent = '💾 Guardar mis pronósticos'; btn.disabled=false;
+  document.getElementById('pred-msg').innerHTML='<div class="msg success" style="margin-top:10px">✓ Pronósticos guardados.</div>';
+  setTimeout(()=>{ const el=document.getElementById('pred-msg'); if(el) el.innerHTML=''; },3000);
+}
+
+function renderResultados() {
+  const groups = [...new Set(MATCHES.map(m=>m.group))];
+  let html = '<div class="msg" style="margin-bottom:1rem">⚽ Cualquier jugador puede cargar los resultados reales.</div>';
+  for (const g of groups) {
+    html += `<div class="group-title">Grupo ${g}</div>`;
+    for (const m of MATCHES.filter(x=>x.group===g)) {
+      const real = realResults[m.id] || {};
+      html += `<div class="card" style="padding:.8rem 1.25rem">
+        <div class="match">
+          <div class="team">${m.home}</div>
+          <div class="score-wrap">
+            <div class="score-col" style="margin-top:16px">
+              <input class="score-input" type="number" min="0" max="20" id="r_h_${m.id}" value="${real.h??''}" placeholder="-">
+              <span class="score-label">Local</span>
+            </div>
+            <span class="score-sep">:</span>
+            <div class="score-col" style="margin-top:16px">
+              <input class="score-input" type="number" min="0" max="20" id="r_a_${m.id}" value="${real.a??''}" placeholder="-">
+              <span class="score-label">Visita</span>
+            </div>
+          </div>
+          <div class="team right">${m.away}</div>
+        </div>
+      </div>`;
+    }
+  }
+  html += `<button class="btn btn-primary" id="save-res-btn" style="margin-top:.5rem" onclick="guardarResultados()">💾 Guardar resultados</button>`;
+  html += `<div id="res-msg"></div>`;
+  document.getElementById('tab-resultados').innerHTML = html;
+}
+
+function guardarResultados() {
+  const btn = document.getElementById('save-res-btn');
+  btn.textContent='Guardando...'; btn.disabled=true;
+  for (const m of MATCHES) {
+    realResults[m.id] = {
+      h: document.getElementById('r_h_'+m.id)?.value ?? '',
+      a: document.getElementById('r_a_'+m.id)?.value ?? '',
+    };
+  }
+  saveResults();
+  btn.textContent='💾 Guardar resultados'; btn.disabled=false;
+  document.getElementById('res-msg').innerHTML='<div class="msg success" style="margin-top:10px">✓ Resultados guardados.</div>';
+  setTimeout(()=>{ const el=document.getElementById('res-msg'); if(el) el.innerHTML=''; },3000);
+}
+
+function renderRanking() {
+  loadAll();
+  const players = Object.keys(allPredictions);
+  if (players.length===0) {
+    document.getElementById('tab-ranking').innerHTML='<div class="msg">Todavía no hay pronósticos cargados.</div>';
+    return;
+  }
+  const ranked = players.map(p => {
+    const preds = allPredictions[p];
+    let pts=0, exact=0, winOnly=0, bonusGol=0;
+    for (const m of MATCHES) {
+      const pred = preds[m.id];
+      const real = realResults[m.id];
+      if (!pred||!real||real.h===''||real.h===undefined) continue;
+      const ph=+pred.h, pa=+pred.a, rh=+real.h, ra=+real.a;
+      const predSign=ph>pa?1:ph<pa?-1:0, realSign=rh>ra?1:rh<ra?-1:0;
+      if(ph===rh&&pa===ra){pts+=3;exact++;}
+      else if(predSign===realSign){pts+=1;winOnly++;}
+      if(pred.gh!==undefined&&pred.gh!==''&&+pred.gh===rh){pts+=1;bonusGol++;}
+    }
+    return {name:p, pts, exact, winOnly, bonusGol};
+  }).sort((a,b)=>b.pts-a.pts||b.exact-a.exact||b.bonusGol-a.bonusGol);
+
+  let html = '<div class="card">';
+  ranked.forEach((p,i)=>{
+    const av=getAvatar(p.name);
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    const isMe=p.name===currentUser;
+    html+=`<div class="rank-row">
+      <div class="pos ${i===0?'gold'}">${i+1}</div>
+      <div class="avatar" style="background:${av.bg};color:${av.c}">${initials(p.name)}</div>
+      <div class="player-name">${p.name} ${medal}${isMe?'<span style="font-size:11px;color:var(--text-muted);font-weight:400"> (vos)</span>':''}</div>
+      <div>
+        <div class="pts-num">${p.pts} <span style="font-size:12px;font-weight:400;color:var(--text-muted)">pts</span></div>
+        <div class="pts-sub">${p.exact} exactos · ${p.winOnly} ganador · ${p.bonusGol} bonus gol</div>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  html+=`<div class="info-box">
+    <strong>Sistema de puntos:</strong><br>
+    ✅ Resultado exacto = 3 pts<br>
+    🟡 Acertar ganador o empate = 1 pt<br>
+    ⭐ Bonus: acertar goles del local = +1 pt
+  </div>`;
+  document.getElementById('tab-ranking').innerHTML=html;
+}
+
+function renderDatos() {
+  loadAll();
+  const exportData = {predictions: allPredictions, results: realResults};
+  const json = JSON.stringify(exportData, null, 2);
+  document.getElementById('tab-datos').innerHTML=`
+    <div class="card">
+      <p style="font-size:14px;font-weight:500;margin-bottom:6px">Cómo jugar con amigos</p>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:1rem">
+        Como cada jugador guarda datos en su propio navegador, para compartir el ranking hay que usar este sistema de exportar/importar:
+      </p>
+      <ol style="font-size:13px;color:var(--text-muted);line-height:2;padding-left:1.2rem">
+        <li>Cada amigo carga sus pronósticos y hace clic en <strong>Exportar mis datos</strong></li>
+        <li>Manda el código por WhatsApp, Telegram, etc.</li>
+        <li>El que administra el prode pega los datos de todos en <strong>Importar datos</strong></li>
+        <li>¡El ranking se actualiza con todos los jugadores!</li>
+      </ol>
+    </div>
+    <div class="card">
+      <p style="font-size:14px;font-weight:500;margin-bottom:8px">📤 Exportar mis datos</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Copiá este texto y mandáselo al organizador:</p>
+      <textarea id="export-area" readonly>${JSON.stringify({predictions: {[currentUser]: allPredictions[currentUser]||{}}, results: realResults})}</textarea>
+      <button class="btn btn-sm" style="margin-top:8px" onclick="copyExport()">📋 Copiar al portapapeles</button>
+      <div id="copy-msg"></div>
+    </div>
+    <div class="card">
+      <p style="font-size:14px;font-weight:500;margin-bottom:8px">📥 Importar datos de un amigo</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Pegá el código que te mandó tu amigo:</p>
+      <textarea id="import-area" placeholder='Pegá el JSON acá...'></textarea>
+      <button class="btn btn-sm" style="margin-top:8px" onclick="doImport()">✅ Importar</button>
+      <div id="import-msg"></div>
+    </div>
+  `;
+}
+
+function copyExport() {
+  const el = document.getElementById('export-area');
+  el.select();
+  document.execCommand('copy');
+  document.getElementById('copy-msg').innerHTML='<div class="msg success" style="margin-top:8px">✓ Copiado.</div>';
+  setTimeout(()=>{ const m=document.getElementById('copy-msg'); if(m) m.innerHTML=''; },2000);
+}
+
+function doImport() {
+  try {
+    const raw = document.getElementById('import-area').value.trim();
+    const data = JSON.parse(raw);
+    if (data.predictions) {
+      for (const [player, preds] of Object.entries(data.predictions)) {
+        allPredictions[player] = preds;
+      }
+      saveAll();
+    }
+    if (data.results) {
+      for (const [id, val] of Object.entries(data.results)) {
+        if (val.h!==''&&val.h!==undefined) realResults[id]=val;
+      }
+      saveResults();
+    }
+    document.getElementById('import-msg').innerHTML='<div class="msg success" style="margin-top:8px">✓ Datos importados correctamente.</div>';
+    setTimeout(()=>{ const m=document.getElementById('import-msg'); if(m) m.innerHTML=''; },3000);
+  } catch(e) {
+    document.getElementById('import-msg').innerHTML='<div class="msg error" style="margin-top:8px">Error: el texto no tiene el formato correcto.</div>';
+  }
+}
+
+loadAll();
+document.getElementById('user-label').textContent='Ingresá tu nombre para jugar';
+document.getElementById('login-name').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
